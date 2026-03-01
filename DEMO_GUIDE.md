@@ -18,7 +18,7 @@ Bật theo thứ tự, đợi mỗi service hiện `Started ...Application`:
 1. `cd eureka-server; mvn spring-boot:run`
 2. `cd auth-service; mvn spring-boot:run`
 3. `cd user-service; mvn spring-boot:run`
-4. `cd user-service; mvn spring-boot:run -Dspring-boot.run.arguments="--server.port=9003"`
+4. `cd user-service; mvn spring-boot:run '-Dspring-boot.run.arguments=--server.port=9003'`
 5. `cd api-gateway; mvn spring-boot:run`
 
 ### Tạo Postman Collection sẵn

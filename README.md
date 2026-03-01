@@ -85,7 +85,7 @@ cd auth-service; mvn spring-boot:run
 cd user-service; mvn spring-boot:run
 
 # 4. User Service — Instance 2
-cd user-service; mvn spring-boot:run -Dspring-boot.run.arguments="--server.port=9003"
+cd user-service; mvn spring-boot:run '-Dspring-boot.run.arguments=--server.port=9003'
 
 # 5. API Gateway
 cd api-gateway; mvn spring-boot:run
