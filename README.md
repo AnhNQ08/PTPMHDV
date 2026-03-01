@@ -76,19 +76,19 @@ PTPMHDV/
 
 ```powershell
 # 1. Eureka Server
-cd eureka-server && mvn spring-boot:run
+cd eureka-server; mvn spring-boot:run
 
 # 2. Auth Service
-cd auth-service && mvn spring-boot:run
+cd auth-service; mvn spring-boot:run
 
 # 3. User Service — Instance 1
-cd user-service && mvn spring-boot:run
+cd user-service; mvn spring-boot:run
 
 # 4. User Service — Instance 2
-cd user-service && mvn spring-boot:run -Dspring-boot.run.arguments="--server.port=9003"
+cd user-service; mvn spring-boot:run -Dspring-boot.run.arguments="--server.port=9003"
 
 # 5. API Gateway
-cd api-gateway && mvn spring-boot:run
+cd api-gateway; mvn spring-boot:run
 ```
 
 Kiểm tra Eureka Dashboard: **http://localhost:8761** — đảm bảo có đủ 4 instances.
