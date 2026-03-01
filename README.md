@@ -1,157 +1,101 @@
-# 🎓 Spring Boot Microservices Demo
+# 🎓 Demo Kiến Trúc Microservices với Spring Boot
 
-> University presentation demo — 4 services showcasing Service Discovery, API Gateway, JWT Authentication, and Load Balancing.
+> Dự án demo gồm 4 service minh họa các khái niệm: **Service Discovery**, **API Gateway**, **Xác thực JWT**, và **Cân bằng tải (Load Balancing)**.
 
-## Architecture Overview
-
-```mermaid
-graph TB
-    Client["🖥️ Client (Postman/curl)"]
-    
-    subgraph Gateway["API Gateway :8080"]
-        LF["LoggingGlobalFilter"]
-        JF["JwtAuthenticationFilter"]
-        RT["Route Config"]
-    end
-    
-    subgraph Eureka["Eureka Server :8761"]
-        SR["Service Registry"]
-    end
-    
-    subgraph Auth["Auth Service :9001"]
-        AL["POST /api/auth/login"]
-    end
-    
-    subgraph User1["User Service :9002"]
-        UL1["GET /api/users"]
-    end
-    
-    subgraph User2["User Service :9003"]
-        UL2["GET /api/users"]
-    end
-    
-    Client --> Gateway
-    Gateway --> |"lb://auth-service"| Auth
-    Gateway --> |"lb://user-service"| User1
-    Gateway --> |"lb://user-service"| User2
-    Auth -.-> Eureka
-    User1 -.-> Eureka
-    User2 -.-> Eureka
-    Gateway -.-> Eureka
-```
-
-## Project Structure
+## Kiến trúc hệ thống
 
 ```
-d:\PTPMHDV\
-├── eureka-server/
-│   ├── pom.xml
-│   └── src/main/
-│       ├── java/com/microservices/demo/eureka/
-│       │   └── EurekaServerApplication.java
-│       └── resources/
-│           └── application.yml
-│
-├── api-gateway/
-│   ├── pom.xml
-│   └── src/main/
-│       ├── java/com/microservices/demo/gateway/
-│       │   ├── ApiGatewayApplication.java
-│       │   ├── util/
-│       │   │   └── JwtUtil.java
-│       │   └── filter/
-│       │       ├── JwtAuthenticationFilter.java
-│       │       └── LoggingGlobalFilter.java
-│       └── resources/
-│           └── application.yml
-│
-├── auth-service/
-│   ├── pom.xml
-│   └── src/main/
-│       ├── java/com/microservices/demo/auth/
-│       │   ├── AuthServiceApplication.java
-│       │   ├── controller/
-│       │   │   └── AuthController.java
-│       │   ├── dto/
-│       │   │   ├── LoginRequest.java
-│       │   │   └── LoginResponse.java
-│       │   └── util/
-│       │       └── JwtUtil.java
-│       └── resources/
-│           └── application.yml
-│
-└── user-service/
-    ├── pom.xml
-    └── src/main/
-        ├── java/com/microservices/demo/user/
-        │   ├── UserServiceApplication.java
-        │   └── controller/
-        │       └── UserController.java
-        └── resources/
-            └── application.yml
+                        ┌──────────────────┐
+                        │   Client (curl/  │
+                        │    Postman)       │
+                        └────────┬─────────┘
+                                 │
+                        ┌────────▼─────────┐
+                        │   API Gateway    │
+                        │   (port 8080)    │
+                        │  • JWT Filter    │
+                        │  • Logging       │
+                        │  • Routing       │
+                        └───┬─────────┬────┘
+                            │         │
+              ┌─────────────▼──┐  ┌───▼──────────────┐
+              │  Auth Service  │  │  User Service     │
+              │  (port 9001)   │  │  (port 9002,9003) │
+              │  POST /login   │  │  GET /api/users   │
+              └───────┬────────┘  └────┬──────┬───────┘
+                      │                │      │
+                ┌─────▼────────────────▼──────▼──────┐
+                │       Eureka Server (port 8761)    │
+                │         Service Registry           │
+                └────────────────────────────────────┘
 ```
 
-## Tech Stack
+## Công nghệ sử dụng
 
-| Technology | Purpose |
+| Công nghệ | Mục đích |
 |---|---|
-| Java 17 | Language |
-| Spring Boot 3.2.5 | Framework |
-| Spring Cloud 2023.0.1 | Cloud support |
+| Java 17 | Ngôn ngữ lập trình |
+| Spring Boot 3.2.5 | Framework chính |
+| Spring Cloud 2023.0.1 | Hỗ trợ microservices |
 | Spring Cloud Gateway | API Gateway (reactive) |
-| Netflix Eureka | Service Discovery |
-| JJWT 0.12.5 | JWT token generation & validation |
+| Netflix Eureka | Đăng ký & phát hiện service |
+| JJWT 0.12.5 | Tạo & xác thực JWT token |
 | Maven | Build tool |
 
-## 🚀 How to Run (Step by Step)
+## Cấu trúc dự án
 
-> [!IMPORTANT]
-> **Start services in this exact order.** Eureka must be running before other services register.
-
-### Prerequisites
-- Java 17+ installed (`java -version`)
-- Maven installed (`mvn -version`)
-
-### Step 1: Start Eureka Server
-```powershell
-cd d:\PTPMHDV\eureka-server
-mvn spring-boot:run
 ```
-Wait until you see: `Started EurekaServerApplication`
-Verify at: **http://localhost:8761**
-
-### Step 2: Start Auth Service
-```powershell
-cd d:\PTPMHDV\auth-service
-mvn spring-boot:run
+PTPMHDV/
+├── eureka-server/       ← Service Discovery (port 8761)
+├── api-gateway/         ← Gateway + JWT Filter + Logging (port 8080)
+├── auth-service/        ← Xác thực & tạo JWT token (port 9001)
+├── user-service/        ← Quản lý user, chạy 2 instance (port 9002, 9003)
+├── TESTING_GUIDE.md     ← Hướng dẫn test đầy đủ (30 test cases)
+└── README.md
 ```
 
-### Step 3: Start User Service — Instance 1 (port 9002)
+## Các chức năng chính
+
+| # | Chức năng | Mô tả |
+|---|-----------|-------|
+| 1 | **Service Discovery** | Tất cả service tự đăng ký với Eureka, không cần cấu hình URL cứng |
+| 2 | **API Gateway** | Một điểm vào duy nhất (port 8080), tự động định tuyến tới service phù hợp |
+| 3 | **Xác thực JWT** | Auth Service tạo token, Gateway xác thực token trước khi chuyển tiếp request |
+| 4 | **Cân bằng tải** | 2 instance User Service, Gateway tự động phân phối request đều giữa chúng |
+| 5 | **Ghi log tập trung** | Mọi request qua Gateway đều được log: method, path, status, thời gian xử lý |
+
+## Hướng dẫn chạy
+
+### Yêu cầu
+- Java 17+ → `java -version`
+- Maven → `mvn -version`
+
+### Khởi động (theo đúng thứ tự)
+
+> ⚠️ Mỗi service chạy trên **một terminal riêng**.
+
 ```powershell
-cd d:\PTPMHDV\user-service
-mvn spring-boot:run
+# 1. Eureka Server
+cd eureka-server && mvn spring-boot:run
+
+# 2. Auth Service
+cd auth-service && mvn spring-boot:run
+
+# 3. User Service — Instance 1
+cd user-service && mvn spring-boot:run
+
+# 4. User Service — Instance 2
+cd user-service && mvn spring-boot:run -Dspring-boot.run.arguments="--server.port=9003"
+
+# 5. API Gateway
+cd api-gateway && mvn spring-boot:run
 ```
 
-### Step 4: Start User Service — Instance 2 (port 9003)
-```powershell
-cd d:\PTPMHDV\user-service
-mvn spring-boot:run -Dspring-boot.run.arguments="--server.port=9003"
-```
+Kiểm tra Eureka Dashboard: **http://localhost:8761** — đảm bảo có đủ 4 instances.
 
-### Step 5: Start API Gateway
-```powershell
-cd d:\PTPMHDV\api-gateway
-mvn spring-boot:run
-```
+## Test nhanh
 
-> [!TIP]
-> Open each service in a **separate terminal window**.
-
----
-
-## 🧪 Testing (Postman or curl)
-
-### 1. Login — Get JWT Token
+### 1. Đăng nhập lấy JWT token
 
 ```bash
 curl -X POST http://localhost:8080/api/auth/login \
@@ -159,104 +103,41 @@ curl -X POST http://localhost:8080/api/auth/login \
   -d '{"username": "admin", "password": "admin123"}'
 ```
 
-**Expected Response:**
-```json
-{
-  "token": "eyJhbGciOiJIUzM4NCJ9...",
-  "username": "admin",
-  "message": "Login successful!"
-}
-```
+Tài khoản có sẵn: `admin/admin123`, `user/user123`, `demo/demo123`
 
-**Mock Users Available:**
-| Username | Password |
-|---|---|
-| `admin` | `admin123` |
-| `user` | `user123` |
-| `demo` | `demo123` |
-
-### 2. Access Users — Without Token (should fail)
-
-```bash
-curl http://localhost:8080/api/users
-```
-
-**Expected Response (401):**
-```json
-{
-  "error": "Missing or invalid Authorization header",
-  "status": 401
-}
-```
-
-### 3. Access Users — With Valid Token
+### 2. Truy cập API (có token)
 
 ```bash
 curl http://localhost:8080/api/users \
-  -H "Authorization: Bearer <YOUR_TOKEN_HERE>"
+  -H "Authorization: Bearer <TOKEN>"
 ```
 
-**Expected Response:**
-```json
-{
-  "message": "User list fetched successfully from port 9002",
-  "serverPort": "9002",
-  "users": [
-    {"id": "1", "name": "Nguyen Van A", "email": "nguyenvana@example.com"},
-    {"id": "2", "name": "Tran Thi B", "email": "tranthib@example.com"},
-    {"id": "3", "name": "Le Van C", "email": "levanc@example.com"}
-  ]
+### 3. Truy cập API (không token → bị chặn)
+
+```bash
+curl http://localhost:8080/api/users
+# → 401: "Missing or invalid Authorization header"
+```
+
+### 4. Kiểm tra cân bằng tải
+
+Gọi nhiều lần, quan sát `serverPort` xen kẽ giữa `9002` và `9003`:
+
+```powershell
+for ($i=1; $i -le 6; $i++) {
+    $r = Invoke-RestMethod -Uri "http://localhost:8080/api/users" -Headers @{"Authorization"="Bearer <TOKEN>"}
+    Write-Host "Lần $i → Port: $($r.serverPort)"
 }
 ```
 
-### 4. Demonstrate Load Balancing
+> 📋 Xem hướng dẫn test chi tiết **30 test cases** tại [TESTING_GUIDE.md](TESTING_GUIDE.md)
 
-Call the same endpoint multiple times:
-```bash
-curl http://localhost:8080/api/users -H "Authorization: Bearer <TOKEN>"
-curl http://localhost:8080/api/users -H "Authorization: Bearer <TOKEN>"
-curl http://localhost:8080/api/users -H "Authorization: Bearer <TOKEN>"
-```
+## Bảng port
 
-> [!TIP]
-> Notice the `serverPort` alternating between **9002** and **9003** — this proves load balancing via Eureka is working!
-
----
-
-## 🔑 Key Concepts for Presentation
-
-### 1. Service Discovery (Eureka)
-- All services register with Eureka Server at `http://localhost:8761`
-- Gateway uses `lb://service-name` URIs for dynamic routing
-- No hardcoded service URLs!
-
-### 2. API Gateway Pattern
-- Single entry point for all client requests (port 8080)
-- Edge routing via path predicates
-- Cross-cutting concerns (auth, logging) handled centrally
-
-### 3. JWT Authentication
-- Auth service generates JWT tokens (HS256 signing)
-- Gateway validates tokens before forwarding requests
-- Open endpoints (login) bypass authentication
-
-### 4. Load Balancing
-- Two instances of user-service run on different ports
-- Gateway automatically distributes requests via Eureka
-- `serverPort` in response proves which instance handled the request
-
-### 5. Global Logging
-- Every request through the gateway is logged
-- Captures: HTTP method, path, response status, execution time (ms)
-
----
-
-## Port Summary
-
-| Service | Port(s) |
+| Service | Port |
 |---|---|
 | Eureka Server | 8761 |
 | API Gateway | 8080 |
 | Auth Service | 9001 |
-| User Service (Instance 1) | 9002 |
-| User Service (Instance 2) | 9003 |
+| User Service #1 | 9002 |
+| User Service #2 | 9003 |
